@@ -1,0 +1,272 @@
+---
+title: "Visualization of 2009-2019"
+author: "Kairui Wang"
+date: "Mar 11, 2021"
+output: 
+  html_document:
+    fig_height: 6
+    fig_width: 10
+---
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+rm(list = ls())      # cleans up your R environment
+
+# load packages
+library(mosaicData)
+library(mosaic)
+library(DataComputing)
+library(ggplot2)
+```
+
+```{r}
+# read CSV data set into R
+conv_2009 <- read.csv("2009 (# Conv)2.csv") 
+conv_2009_del <- conv_2009[,c("Micro.Citation.Name","Social.Harm","X..Charges..Grand.Total.","X..All.Charges..For.Any.Offense.","X..Charges.by.Race..Black.","X..Charges.by.Race..White.","X..Charges.by.Race..Hispanic.","X..Charges.by.Race..Asian.","X..Charges.by.Race..Native.American.")]
+names(conv_2009_del)<-c("Micro_Citation_Name","Social_Harm","Charges_Total","Charges_percent","Black","White","Hispanic","Asian","Native_American")
+```
+
+```{r}
+conv_2009_del
+```
+
+```{r}
+#black
+conv_2009_del2 <- conv_2009_del[!grepl("At least", conv_2009_del$Black),]
+conv_2009_del2 <- conv_2009_del2[!grepl("<", conv_2009_del2$Black),]
+conv_2009_del2 <- conv_2009_del2[!grepl("None", conv_2009_del2$Black),]
+```
+
+```{r}
+#white
+conv_2009_del3 <- conv_2009_del[!grepl("At least", conv_2009_del$Asian),]
+conv_2009_del3 <- conv_2009_del3[!grepl("<", conv_2009_del3$Asian),]
+conv_2009_del3 <- conv_2009_del3[!grepl("None", conv_2009_del3$Asian),]
+conv_2009_del3 <- conv_2009_del3[!grepl("<", conv_2009_del3$Charges_Total),]
+```
+
+```{r}
+#conv_2009_del2
+conv_2009_del3$Asian_count <- as.numeric(as.character(conv_2009_del3$Charges_Total))*as.numeric(as.character(conv_2009_del3$Asian))
+conv_2009_del3
+```
+
+```{r}
+conv_2009_Black_total <- conv_2009_del2 %>% 
+  group_by(Social_Harm) %>%
+  summarise(Total_Black = sum(Black_count), count = n())
+```
+
+```{r}
+conv_2009_Asian_total <- conv_2009_del3 %>% 
+  group_by(Social_Harm) %>%
+  summarise(Total_Asian = sum(Asian_count), count = n())
+conv_2009_Asian_total
+```
+
+```{r}
+conv_2009_black_total
+```
+
+```{r}
+#2019
+# read CSV data set into R
+conv_2019 <- read.csv("2019 (# Conv)2.csv") 
+conv_2019_del <- conv_2019[,c("Micro.Citation.Name","Social.Harm","X..Charges..Grand.Total.","X..All.Charges..For.Any.Offense.","X..Charges.by.Race..Black.","X..Charges.by.Race..White.","X..Charges.by.Race..Hispanic.","X..Charges.by.Race..Asian.","X..Charges.by.Race..Native.American.")]
+names(conv_2019_del)<-c("Micro_Citation_Name","Social_Harm","Charges_Total","Charges_percent","Black","White","Hispanic","Asian","Native_American")
+```
+
+```{r}
+conv_2019_del2 <- conv_2019_del[!grepl("At least", conv_2019_del$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("<", conv_2019_del2$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("None", conv_2019_del2$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("<", conv_2019_del2$Charges_Total),]
+conv_2019_del2
+```
+```{r}
+#conv_2009_del2
+conv_2019_del2$Native_American_count <- as.numeric(as.character(conv_2019_del2$Charges_Total))*as.numeric(as.character(conv_2019_del2$Native_American))
+conv_2019_Native_American_total <- conv_2019_del2 %>% 
+  group_by(Social_Harm) %>%
+  summarise(Total_Native_American = sum(Native_American_count), count = n())
+conv_2019_Native_American_total
+```
+
+```{r}
+conv_09_19 <- read.csv("conv_09_19.csv")
+ggplot(conv_09_19, aes(factor(Social.Harm), Total_charge, fill = year)) + 
+  geom_bar(stat="identity", position = "dodge") + 
+  scale_fill_brewer(palette = "Set1")
+```
+
+```{r}
+conv_09_19_2 <- read.csv("conv_09_19_2.csv")
+conv_09_19_2
+ggplot(conv_09_19_2, aes(factor(year), Total_charge, fill = Race)) + 
+  geom_bar(stat="identity", position = "stack") + 
+  scale_fill_brewer(palette = "Set2") + 
+  facet_wrap(~Social.Harm, ncol = 8)
+```
+
+```{r}
+#Conviction
+# read CSV data set into R
+conv_2019 <- read.csv("2019 (# Conv)2.csv") 
+conv_2019_del <- conv_2019[,c("Micro.Citation.Name","Social.Harm","X..Convictions..Grand.Total.","X..All.Convictions..For.Any.Offense.","X..Convictions.by.Race..Black.","X..Convictions.by.Race..White.","X..Convictions.by.Race..Hispanic.","X..Convictions.by.Race..Asian.","X..Convictions.by.Race..Native.American.")]
+names(conv_2019_del)<-c("Micro_Citation_Name","Social_Harm","Charges_Total","Charges_percent","Black","White","Hispanic","Asian","Native_American")
+```
+
+```{r}
+#Conviction
+# read CSV data set into R
+conv_2009 <- read.csv("2009 (# Conv)2.csv") 
+conv_2009_del <- conv_2009[,c("Micro.Citation.Name","Social.Harm","X..Convictions..Grand.Total.","X..All.Convictions..For.Any.Offense.","X..Convictions.by.Race..Black.","X..Convictions.by.Race..White.","X..Convictions.by.Race..Hispanic.","X..Convictions.by.Race..Asian.","X..Convictions.by.Race..Native.American.")]
+names(conv_2009_del)<-c("Micro_Citation_Name","Social_Harm","Charges_Total","Charges_percent","Black","White","Hispanic","Asian","Native_American")
+```
+
+```{r}
+#black
+conv_2009_del2 <- conv_2009_del[!grepl("At least", conv_2009_del$Native_American),]
+conv_2009_del2 <- conv_2009_del2[!grepl("<", conv_2009_del2$Native_American),]
+conv_2009_del2 <- conv_2009_del2[!grepl("None", conv_2009_del2$Native_American),]
+conv_2009_del2 <- conv_2009_del2[!grepl("<", conv_2009_del2$Charges_Total),]
+conv_2009_del2
+```
+
+```{r}
+#black
+conv_2019_del2 <- conv_2019_del[!grepl("At least", conv_2019_del$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("<", conv_2019_del2$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("None", conv_2019_del2$Native_American),]
+conv_2019_del2 <- conv_2019_del2[!grepl("<", conv_2019_del2$Charges_Total),]
+conv_2019_del2
+```
+
+```{r}
+#conv_2009_del2
+conv_2009_del2$Asian_count <- as.numeric(as.character(conv_2009_del2$Charges_Total))*as.numeric(as.character(conv_2009_del2$Asian))
+conv_2009_Asian_total <- conv_2009_del2 %>% 
+  group_by(Social_Harm) %>%
+  summarise(Total_Asian = sum(Asian_count), count = n())
+conv_2009_Asian_total
+```
+
+```{r}
+#conv_2009_del2
+conv_2019_del2$Native_American_count <- as.numeric(as.character(conv_2019_del2$Charges_Total))*as.numeric(as.character(conv_2019_del2$Native_American))
+conv_2019_Native_American_total <- conv_2019_del2 %>% 
+  group_by(Social_Harm) %>%
+  summarise(Total_Native_American = sum(Native_American_count), count = n())
+conv_2019_Native_American_total
+```
+
+```{r}
+conv_09_19_3 <- read.csv("conv_09_19_3.csv")
+conv_09_19_3
+ggplot(conv_09_19_3, aes(factor(year), Total_charge, fill = Race)) + 
+  geom_bar(stat="identity", position = "stack") + 
+  scale_fill_brewer(palette = "Set2") + 
+  facet_wrap(~Social.Harm, ncol = 8)
+```
+
+
+```{r}
+#old
+conv_2009_race <- conv_2009[,c("Micro.Citation.Name","Social.Harm","Black","White","Hispanic","Asian","Native.American","Native.Hawiian.or.Pacific.Islander","Other","Unknown","Missing.Data","Male")]
+conv_2009_race
+```
+```{r}
+ggplot(data=conv_2009_race, aes(x = Social.Harm, y=Black)) +
+  geom_point()
+```
+
+```{r}
+conv_2009_race_total <- conv_2009_race %>% 
+  group_by(Social.Harm) %>%
+  summarise(total_percent_black = sum(Black), count = n())
+conv_2009_race_total$average_percent_black <- conv_2009_race_total$total_percent_black/conv_2009_race_total$count
+
+conv_2009_race_total
+```
+```{r}
+#conv_2009_race_total$year <- 2009
+#conv_2019_race_total$year <- 2019
+conv_2009_2019 <- 
+  conv_2009_race_total %>%
+  select(Social.Harm, total_percent_black, year) %>% 
+  left_join(conv_2019_race_total %>% select(Social.Harm, total_percent_black, year),
+            by = c("Social.Harm" = "Social.Harm"))
+
+conv_2009_2019
+```
+
+```{r}
+conv_2019_race_total <- conv_2019_race %>% 
+  group_by(Social.Harm) %>%
+  summarise(total_percent_black = sum(Black), count = n())
+conv_2019_race_total$average_percent_black <- conv_2019_race_total$total_percent_black/conv_2019_race_total$count
+
+ggplot(data=conv_2019_race_total, aes(x = Social.Harm, y=total_percent_black)) +
+  geom_bar(stat = 'identity', position = 'dodge', width = .9)
+```
+
+```{r}
+conv_2019
+```
+
+```{r}
+conv_2019_race <- conv_2019_2[,c("Micro.Citation.Name","Social.Harm","X..Charges.by.Race..Black.")]
+conv_2019_race_group <-
+  conv_2019_race %>%
+  group_by(X..Charges.by.Race..Black.) %>%
+  summarise(count = n())
+conv_2019_race_group$percent<-conv_2019_race_group$count/175
+conv_2019_race_group
+```
+
+
+```{r}
+p<-ggplot(conv_2019_race_group,aes(x="",y=percent,fill=X..Charges.by.Race..Black.)) +
+  geom_bar(stat = "identity",color="white") + 
+  coord_polar(theta = "y") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank())
+p
+```
+
+
+```{r}
+ggplot(data=conv_2009_race, aes(x = Social.Harm, y=White)) +
+  geom_point()
+```
+
+
+
+
+
+
+
+```{r}
+ggplot(data=conv_2009_race,aes(x=Male,y=Black)) +
+  geom_point()+
+  facet_wrap(~Social.Harm,ncol=4) +
+  scale_x_log10() +
+  scale_y_log10() +
+  theme_bw()
+```
+
+```{r}
+conv_2009_gender_group
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
